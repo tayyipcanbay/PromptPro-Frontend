@@ -7,6 +7,9 @@ import './css/Ask.css';
 const Ask = () => {
     const location = useLocation();
 
+     const host = 'https://tayyipcanbay.pythonanywhere.com';
+    // const host = 'http://localhost:5000';
+
     const [token, ] = useState(location.state.token);
     const [email, ] = useState(location.state.email);
     const [input, setInput] = useState('');
@@ -58,7 +61,7 @@ const Ask = () => {
                 formData.append('email', email);
                 formData.append('token', token);
                 formData.append('text', input);
-                const response = await axios.post('http://localhost:3131/ask-image', formData,{
+                const response = await axios.post(`${host}/ask-file`, formData,{
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -68,7 +71,7 @@ const Ask = () => {
                 console.log(message)
                 setMessages(prevMessages => prevMessages.filter(msg => msg !== loadingMessage).concat([{ text: input, type: 'sent', file: file }, { text: message, type: 'received' }]));
             } else {
-                const response = await axios.post('http://localhost:3131/ask-text', { text: input, email, token });
+                const response = await axios.post(`${host}/ask-text`, { text: input, email, token });
                 message = typeof response.data === 'object' ? response.data.text : response.data;
                 console.log(typeof(message))
                 console.log(message)

@@ -9,6 +9,9 @@ const LoginPage = () => {
   const [token, setToken] = useState('');
   const navigate = useNavigate();
 
+  const host = 'https://tayyipcanbay.pythonanywhere.com';
+  // const host = 'http://localhost:5000';
+
   useEffect(() => {
     const savedEmail = localStorage.getItem('email');
     const savedToken = localStorage.getItem('token');
@@ -30,7 +33,7 @@ const LoginPage = () => {
     event.preventDefault();
   
     try {
-      const response = await axios.post('http://localhost:3131/login', { email, token });
+      const response = await axios.post(`${host}/login`, { email, token });
   
       if (response.status === 200) {
         localStorage.setItem('email', email);
