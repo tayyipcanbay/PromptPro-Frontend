@@ -7,7 +7,7 @@ import './css/Ask.css';
 const Ask = () => {
     const location = useLocation();
 
-     const host = 'https://tayyipcanbay.pythonanywhere.com';
+    const host = 'https://tayyipcanbay.pythonanywhere.com';
     // const host = 'http://localhost:5000';
 
     const [token, ] = useState(location.state.token);
@@ -18,26 +18,23 @@ const Ask = () => {
         { text: 'Hello, how can I help you?', type: 'received' }
     ]);
     const [isDragging, setIsDragging] = useState(false);
-    
+    const [errorMessage, setErrorMessage] = useState('');
+
     const handleDragOver = (e) => {
-        console.log("dragging")
         e.preventDefault();
         setIsDragging(true);
-    }
+    };
 
     const handleDragLeave = (e) => {
-        console.log("drag leave")
         e.preventDefault();
         setIsDragging(false);
-    }
-    
+    };
+
     const handleDrop = (e) => {
         e.preventDefault();
-        console.log("dropped")
-        console.log(e.dataTransfer.files);
-        file = e.dataTransfer.files[0];
+        const droppedFile = e.dataTransfer.files[0];
         setIsDragging(false);
-        let droppedFileMessage = { text: `Uploaded file: ${file.name}`, type: 'received', file: file }
+        let droppedFileMessage = { text: `Uploaded file: ${droppedFile.name}`, type: 'received', file: droppedFile };
         if (e.dataTransfer.items) {
             for (var i = 0; i < e.dataTransfer.items.length; i++) {
                 if (e.dataTransfer.items[i].kind === 'file') {
@@ -51,38 +48,36 @@ const Ask = () => {
 
     const handleSend = async () => {
         try {
+            setErrorMessage('');
             let message;
             const loadingMessage = { text: 'Let me think...', type: 'received' };
             setMessages([...messages, loadingMessage]);
-    
+
             if (file) {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('email', email);
                 formData.append('token', token);
                 formData.append('text', input);
-                const response = await axios.post(`${host}/ask-file`, formData,{
+                const response = await axios.post(`${host}/ask-file`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
                 message = typeof response.data === 'object' ? response.data.text : response.data;
-                console.log(typeof(message))
-                console.log(message)
                 setMessages(prevMessages => prevMessages.filter(msg => msg !== loadingMessage).concat([{ text: input, type: 'sent', file: file }, { text: message, type: 'received' }]));
             } else {
                 const response = await axios.post(`${host}/ask-text`, { text: input, email, token });
                 message = typeof response.data === 'object' ? response.data.text : response.data;
-                console.log(typeof(message))
-                console.log(message)
                 setMessages(prevMessages => prevMessages.filter(msg => msg !== loadingMessage).concat([{ text: input, type: 'sent' }, { text: message, type: 'received' }]));
             }
             setInput('');
             setFile(null);
         } catch (error) {
+            setErrorMessage(`${error.message} - Please chech your quota and try again later.`);
             console.error(error);
         }
-    }
+    };
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -96,22 +91,18 @@ const Ask = () => {
             <div className={`${isDragging ? 'dragging-alert' : 'non-dragging-alert'}`}>
                 <h1>Drop file here</h1>
             </div>
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
             <div id="messages">
                 {messages.map((message, index) => (
                     <div key={index} className='message'>
                         <div className={message.type}>
-                            {message.file && <div className='asd'><img src={URL.createObjectURL(message.file)} alt={message.file.name} style={{ maxWidth: '100%', height: 'auto' }} /></div> }
+                            {message.file && <div className='asd'><img src={URL.createObjectURL(message.file)} alt={message.file.name} style={{ maxWidth: '100%', height: 'auto' }} /></div>}
                             {message.text}
                         </div>
                     </div>
                 ))}
             </div>
             <div id="chat-input">
-                {/* <div id="file-input">
-                    <label htmlFor="file-inp">Upload file
-                        <input id='file-inp' type="file" onChange={(e) => setFile(e.target.files[0])} />
-                    </label>
-                </div> */}
                 <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={handleKeyPress} />
                 <button id='send-btn' onClick={handleSend}>Send</button>
             </div>
