@@ -45,3 +45,16 @@ button {
 button:hover {
     background-color: #27ae60;
 }
+
+/* Error message styling */
+.error-message {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+}
