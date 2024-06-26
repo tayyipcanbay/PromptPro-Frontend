@@ -11,7 +11,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const host = 'https://tayyipcanbay.pythonanywhere.com';
-  // const host = 'http://localhost:5000';
+  // const host = 'http://localhost:5500';
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('email');
