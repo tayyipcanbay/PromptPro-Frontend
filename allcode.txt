@@ -1,3 +1,41 @@
+Path : src/App.js
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import WelcomePage from './pages/WelcomePage'; // Assuming WelcomePage.js is in the same directory
+import LoginPage from './pages/LoginPage'; // Assuming LoginPage.js is in the same directory
+import Ask from './pages/Ask';
+import './App.css';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path='/ask' element={<Ask />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+Path : src/index.js
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+Path : src/pages/Ask.js
+
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -8,7 +46,7 @@ const Ask = () => {
     const location = useLocation();
 
     const host = 'https://tayyipcanbay.pythonanywhere.com';
-    // const host = 'http://localhost:5500';
+    // const host = 'http://localhost:5000';
 
     const [token, ] = useState(location.state.token);
     const [email, ] = useState(location.state.email);
@@ -111,3 +149,111 @@ const Ask = () => {
 };
 
 export default Ask;
+
+
+Path : src/pages/LoginPage.js
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+import './css/LoginPage.css';
+
+const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
+
+  const host = 'https://tayyipcanbay.pythonanywhere.com';
+  // const host = 'http://localhost:5000';
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('email');
+    const savedToken = localStorage.getItem('token');
+
+    if (savedEmail && savedToken) {
+      navigate('/ask', { state: { email: savedEmail, token: savedToken } });
+    }
+  }, [navigate]);
+
+  const handleInputChange = (event) => {
+    if (event.target.name === 'email') {
+      setEmail(event.target.value);
+    } else if (event.target.name === 'token') {
+      setToken(event.target.value);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');  // Clear any previous error message
+
+    try {
+      const response = await axios.post(`${host}/login`, { email, token });
+
+      if (response.status === 200) {
+        localStorage.setItem('email', email);
+        localStorage.setItem('token', token);
+        navigate('/ask', { state: { email, token } });
+      } else if (response.status === 401) {
+        setErrorMessage('Login failed. Please check your credentials and try again.');
+      } else if (response.status === 500) {
+        setErrorMessage('An error occurred on the server. Please try again later.');
+      } else {
+        setErrorMessage('An unknown error occurred. Please try again later.');
+      }
+    } catch (error) {
+      setErrorMessage('Login failed. Please check your credentials and try again.');
+      console.error(error);
+    }
+  };
+
+  return (
+    <div className="animated-background login-page">
+      <form onSubmit={handleSubmit}>
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+        <label>
+          Email:
+          <input type="email" name="email" value={email} onChange={handleInputChange} />
+        </label>
+        <label>
+          Token:
+          <input type="password" name="token" value={token} onChange={handleInputChange} />
+        </label>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+};
+
+export default LoginPage;
+
+Path : src/pages/WelcomePage.js
+
+import React from 'react';
+import './css/WelcomePage.css';
+import { useNavigate } from 'react-router-dom';
+
+
+function WelcomePage() {
+    const navigate = useNavigate();
+    return (
+        <div className='animated-background'>
+            <div className='welcome-body'>
+                <h1 className="bouncing-text">Welcome to our website!</h1>
+                <p className="bouncing-text">We're glad to have you here. Enjoy your stay!</p>
+                <div className="welcome-button-container">
+                    <button className="button" onClick={() => navigate('/login')}>Login</button>
+
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default WelcomePage;
+
+
+
+
